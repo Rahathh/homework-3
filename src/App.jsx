@@ -218,29 +218,104 @@ function Hero() {
 }
 
 // ── MENU CARD ──
-function MenuCard({ name, price, desc, tag }) {
+function MenuCard({ name, price, desc, tag, addToCart }) {
   const [hovered, setHovered] = useState(false);
+
   return (
     <div
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
       style={{
         background: hovered ? "#2a2a26" : "#22221f",
-        padding: "2rem", display: "flex", flexDirection: "column", gap: "0.5rem",
+        padding: "2rem",
+        display: "flex",
+        flexDirection: "column",
+        gap: "0.5rem",
         transition: "background 0.2s",
-      }}>
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
-        <span style={{ fontFamily: "'Playfair Display', serif", fontSize: "1.15rem", color: COLORS.cream, lineHeight: 1.3, maxWidth: "70%" }}>{name}</span>
-        <span style={{ color: COLORS.gold, fontWeight: 600, fontSize: "1rem", whiteSpace: "nowrap" }}>{price}</span>
+      }}
+    >
+      <div
+        style={{
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "flex-start",
+        }}
+      >
+        <span
+          style={{
+            fontFamily: "'Playfair Display', serif",
+            fontSize: "1.15rem",
+            color: COLORS.cream,
+            lineHeight: 1.3,
+            maxWidth: "70%",
+          }}
+        >
+          {name}
+        </span>
+
+        <span
+          style={{
+            color: COLORS.gold,
+            fontWeight: 600,
+            fontSize: "1rem",
+            whiteSpace: "nowrap",
+          }}
+        >
+          {price}
+        </span>
       </div>
-      <p style={{ color: "#7a7060", fontSize: "0.88rem", lineHeight: 1.6, margin: 0 }}>{desc}</p>
-      {tag && <span style={{ display: "inline-block", fontSize: "0.65rem", letterSpacing: "0.12em", textTransform: "uppercase", color: COLORS.ember, border: `1px solid ${COLORS.ember}`, padding: "0.15rem 0.6rem", alignSelf: "flex-start", marginTop: "0.3rem" }}>{tag}</span>}
+
+      <p
+        style={{
+          color: "#7a7060",
+          fontSize: "0.88rem",
+          lineHeight: 1.6,
+          margin: 0,
+        }}
+      >
+        {desc}
+      </p>
+
+      {tag && (
+        <span
+          style={{
+            display: "inline-block",
+            fontSize: "0.65rem",
+            letterSpacing: "0.12em",
+            textTransform: "uppercase",
+            color: COLORS.ember,
+            border: `1px solid ${COLORS.ember}`,
+            padding: "0.15rem 0.6rem",
+            alignSelf: "flex-start",
+            marginTop: "0.3rem",
+          }}
+        >
+          {tag}
+        </span>
+      )}
+
+      <button
+        onClick={() => addToCart({ name, price })}
+        style={{
+          marginTop: "1rem",
+          background: COLORS.ember,
+          color: "white",
+          border: "none",
+          padding: "0.8rem 1rem",
+          cursor: "pointer",
+          fontWeight: 600,
+          letterSpacing: "0.08em",
+          textTransform: "uppercase",
+        }}
+      >
+        Add To Cart
+      </button>
     </div>
   );
 }
 
 // ── MENU ──
-function Menu() {
+function Menu({ addToCart }) {
   const tabs = ["starters", "mains", "desserts", "drinks"];
   const [active, setActive] = useState("starters");
 
@@ -274,7 +349,13 @@ function Menu() {
         gap: "1.5px",
         background: "rgba(255,255,255,0.05)",
       }}>
-        {menuData[active].map((item, i) => <MenuCard key={i} {...item} />)}
+        {menuData[active].map((item, i) => (
+  <MenuCard
+    key={i}
+    {...item}
+    addToCart={addToCart}
+  />
+))}
       </div>
 
       <style>{`@media(max-width:900px){#menu{padding:4rem 2rem!important}}`}</style>
@@ -523,6 +604,100 @@ function Footer() {
         }
       `}</style>
     </footer>
+  );
+}
+
+function Cart({ cart, removeFromCart, clearCart }) {
+  const total = cart.reduce((sum, item) => {
+    const numericPrice = parseFloat(item.price.replace("$", ""));
+    return sum + numericPrice * item.quantity;
+  }, 0);
+
+  return (
+    <section
+      style={{
+        background: "#1a1a18",
+        color: "white",
+        padding: "4rem 2rem",
+      }}
+    >
+      <div className="container">
+        <h2
+          style={{
+            fontFamily: "'Playfair Display', serif",
+            fontSize: "3rem",
+            marginBottom: "2rem",
+          }}
+        >
+          Shopping Cart
+        </h2>
+
+        {cart.length === 0 ? (
+          <p>Your cart is empty.</p>
+        ) : (
+          <>
+            {cart.map((item, index) => (
+              <div
+                key={index}
+                style={{
+                  display: "flex",
+                  justifyContent: "space-between",
+                  alignItems: "center",
+                  padding: "1rem 0",
+                  borderBottom: "1px solid rgba(255,255,255,0.1)",
+                }}
+              >
+                <div>
+                  <h3>{item.name}</h3>
+
+                  <p>
+                    {item.price} × {item.quantity}
+                  </p>
+                </div>
+
+                <button
+                  onClick={() => removeFromCart(item.name)}
+                  style={{
+                    background: "crimson",
+                    border: "none",
+                    color: "white",
+                    padding: "0.6rem 1rem",
+                    cursor: "pointer",
+                  }}
+                >
+                  Remove
+                </button>
+              </div>
+            ))}
+
+            <h3
+              style={{
+                marginTop: "2rem",
+                fontSize: "1.5rem",
+                color: COLORS.gold,
+              }}
+            >
+              Total: ${total.toFixed(2)}
+            </h3>
+
+            <button
+              onClick={clearCart}
+              style={{
+                marginTop: "1.5rem",
+                background: COLORS.ember,
+                border: "none",
+                color: "white",
+                padding: "1rem 1.5rem",
+                cursor: "pointer",
+                fontWeight: 600,
+              }}
+            >
+              Clear Cart
+            </button>
+          </>
+        )}
+      </div>
+    </section>
   );
 }
 
