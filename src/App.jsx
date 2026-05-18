@@ -62,7 +62,7 @@ function Nav() {
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
 
-  const links = ["home", "menu", "gallery", "about", "contact"];
+  const links = ["home", "menu","cart", "gallery", "about", "contact"];
 
   const handleLink = (e, id) => {
     e.preventDefault();
@@ -317,7 +317,7 @@ function MenuCard({ name, price, desc, tag, addToCart }) {
   );
 }
 
-function Menu({ addToCart }) {
+function Menu({ addToCart, menuData }) {
   const tabs = ["starters", "mains", "desserts", "drinks"];
   const [active, setActive] = useState("starters");
 
@@ -374,7 +374,7 @@ function Menu({ addToCart }) {
           gap: "1rem",
         }}
       >
-        {menuData[active].map((item, i) => (
+        {menuData[active]?.map((item, i) => (
           <MenuCard
             key={i}
             {...item}
@@ -635,9 +635,30 @@ function Cart({ cart, removeFromCart, clearCart }) {
     const numericPrice = parseFloat(item.price.replace("$", ""));
     return sum + numericPrice * item.quantity;
   }, 0);
+  const placeOrder = async () => {
+  const response = await fetch("http://localhost:5000/api/orders", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      items: cart,
+      total,
+    }),
+  });
+
+  const data = await response.json();
+
+  console.log(data);
+
+  alert("Order placed!");
+
+  clearCart();
+};
 
   return (
     <section
+    id="cart"
       style={{
         background: "#1a1a18",
         color: "white",
@@ -703,20 +724,35 @@ function Cart({ cart, removeFromCart, clearCart }) {
               Total: ${total.toFixed(2)}
             </h3>
 
-            <button
-              onClick={clearCart}
-              style={{
-                marginTop: "1.5rem",
-                background: COLORS.ember,
-                border: "none",
-                color: "white",
-                padding: "1rem 1.5rem",
-                cursor: "pointer",
-                fontWeight: 600,
-              }}
-            >
-              Clear Cart
-            </button>
+            <div style={{ display: "flex", gap: "1rem", marginTop: "1.5rem" }}>
+  <button
+    onClick={clearCart}
+    style={{
+      background: COLORS.ember,
+      border: "none",
+      color: "white",
+      padding: "1rem 1.5rem",
+      cursor: "pointer",
+      fontWeight: 600,
+    }}
+  >
+    Clear Cart
+  </button>
+
+  <button
+    onClick={placeOrder}
+    style={{
+      background: COLORS.gold,
+      border: "none",
+      color: "black",
+      padding: "1rem 1.5rem",
+      cursor: "pointer",
+      fontWeight: 600,
+    }}
+  >
+    Place Order
+  </button>
+</div>
           </>
         )}
       </div>
@@ -726,8 +762,23 @@ function Cart({ cart, removeFromCart, clearCart }) {
 
 // ── APP ──
 export default function App() {
-  const [cart, setCart] = useState([]);
+  const [menuData, setMenuData] = useState({});
+    useEffect(() => {
+  fetch("http://localhost:5000/api/menu")
+    .then((res) => res.json())
+    .then((data) => {
+      const grouped = {
+        starters: data.filter((i) => i.category === "starters"),
+        mains: data.filter((i) => i.category === "mains"),
+        desserts: data.filter((i) => i.category === "desserts"),
+        drinks: data.filter((i) => i.category === "drinks"),
+      };
 
+      setMenuData(grouped);
+    });
+}, []);
+  const [cart, setCart] = useState([]);
+  
   const addToCart = (item) => {
     setCart((prevCart) => {
       const existingItem = prevCart.find(
@@ -798,7 +849,10 @@ export default function App() {
       <Nav />
       <Hero />
 
-      <Menu addToCart={addToCart} />
+      <Menu
+      addToCart={addToCart}
+      menuData={menuData}
+      />
 
       <Cart
         cart={cart}
