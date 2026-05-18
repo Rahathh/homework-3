@@ -1,4 +1,4 @@
-import mongoose from "mongoose";
+import mongoose from "mongoose"
 
 const orderSchema = new mongoose.Schema({
   items: Array,
@@ -7,8 +7,8 @@ const orderSchema = new mongoose.Schema({
     type: Date,
     default: Date.now,
   },
-});
+})
 
-const Order = mongoose.model("Order", orderSchema);
+const Order = mongoose.model("Order", orderSchema)
 
-export default Order;
+export default Order
