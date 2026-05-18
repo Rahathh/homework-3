@@ -784,9 +784,8 @@ export default function App() {
         }
 
         section{
-          padding: clamp(3rem, 6vw, 6rem)
-          clamp(1.5rem, 5vw, 4rem);
-        }
+  padding: clamp(3rem, 6vw, 6rem) clamp(1.5rem, 5vw, 4rem);
+}
 
         .container{
           max-width:1200px;
