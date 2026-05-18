@@ -295,7 +295,10 @@ function MenuCard({ name, price, desc, tag, addToCart }) {
       )}
 
       <button
-        onClick={() => addToCart({ name, price })}
+        onClick={() => {
+  console.log("clicked");
+  addToCart({ name, price });
+}}
         style={{
           marginTop: "1rem",
           background: COLORS.ember,
@@ -314,51 +317,71 @@ function MenuCard({ name, price, desc, tag, addToCart }) {
   );
 }
 
-// ── MENU ──
 function Menu({ addToCart }) {
   const tabs = ["starters", "mains", "desserts", "drinks"];
   const [active, setActive] = useState("starters");
 
   return (
-    <section id="menu" style={{ background: COLORS.charcoal, color: COLORS.cream, boxSizing: "border-box" }}>
-      <span style={{ fontSize: "0.72rem", letterSpacing: "0.22em", textTransform: "uppercase", color: COLORS.ember, marginBottom: "0.6rem", display: "block" }}>What We Serve</span>
-      <h2 style={{ fontFamily: "'Playfair Display', serif", fontSize: "clamp(2rem,4vw,3.2rem)", lineHeight: 1.15, marginBottom: "1.2rem", color: COLORS.cream }}>Our Menu</h2>
-      <p style={{ color: "#9a9080", lineHeight: 1.8, maxWidth: "560px", marginBottom: 0 }}>Every dish is crafted to order using locally sourced, seasonal ingredients.</p>
-      <div style={{ width: "40px", height: "2px", background: COLORS.gold, margin: "1.5rem 0 3rem" }} />
+    <section
+      id="menu"
+      style={{
+        background: COLORS.charcoal,
+        color: COLORS.cream,
+        padding: "4rem 2rem",
+      }}
+    >
+      <h2
+        style={{
+          fontFamily: "'Playfair Display', serif",
+          fontSize: "3rem",
+          marginBottom: "2rem",
+        }}
+      >
+        Our Menu
+      </h2>
 
-      <div style={{ display: "flex", gap: 0, marginBottom: "3rem", borderBottom: "1px solid rgba(255,255,255,0.1)", overflowX: "auto" }}>
-        {tabs.map(t => (
-          <button key={t} onClick={() => setActive(t)}
+      <div
+        style={{
+          display: "flex",
+          gap: "1rem",
+          marginBottom: "2rem",
+          flexWrap: "wrap",
+        }}
+      >
+        {tabs.map((t) => (
+          <button
+            key={t}
+            onClick={() => setActive(t)}
             style={{
-              background: "none", border: "none", cursor: "pointer",
-              color: active === t ? COLORS.gold : COLORS.warmGray,
-              fontFamily: "'Jost', sans-serif", fontSize: "0.82rem", fontWeight: 500,
-              letterSpacing: "0.1em", textTransform: "uppercase",
-              padding: "0.8rem 1.8rem", position: "relative",
-              borderBottom: active === t ? `2px solid ${COLORS.gold}` : "2px solid transparent",
-              transition: "color 0.2s", whiteSpace: "nowrap",
-            }}>
-            {t.charAt(0).toUpperCase() + t.slice(1)}
+              padding: "0.7rem 1.2rem",
+              cursor: "pointer",
+              background:
+                active === t ? COLORS.gold : "transparent",
+              color: active === t ? "black" : "white",
+              border: `1px solid ${COLORS.gold}`,
+            }}
+          >
+            {t}
           </button>
         ))}
       </div>
 
-      <div style={{
-        display: "grid",
-        gridTemplateColumns: "repeat(auto-fill,minmax(300px,1fr))",
-        gap: "1.5px",
-        background: "rgba(255,255,255,0.05)",
-      }}>
+      <div
+        style={{
+          display: "grid",
+          gridTemplateColumns:
+            "repeat(auto-fit,minmax(300px,1fr))",
+          gap: "1rem",
+        }}
+      >
         {menuData[active].map((item, i) => (
-  <MenuCard
-    key={i}
-    {...item}
-    addToCart={addToCart}
-  />
-))}
+          <MenuCard
+            key={i}
+            {...item}
+            addToCart={addToCart}
+          />
+        ))}
       </div>
-
-      <style>{`@media(max-width:900px){#menu{padding:4rem 2rem!important}}`}</style>
     </section>
   );
 }
@@ -703,34 +726,87 @@ function Cart({ cart, removeFromCart, clearCart }) {
 
 // ── APP ──
 export default function App() {
+  const [cart, setCart] = useState([]);
+
+  const addToCart = (item) => {
+    setCart((prevCart) => {
+      const existingItem = prevCart.find(
+        (cartItem) => cartItem.name === item.name
+      );
+
+      if (existingItem) {
+        return prevCart.map((cartItem) =>
+          cartItem.name === item.name
+            ? {
+                ...cartItem,
+                quantity: cartItem.quantity + 1,
+              }
+            : cartItem
+        );
+      }
+
+      return [...prevCart, { ...item, quantity: 1 }];
+    });
+  };
+
+  const removeFromCart = (name) => {
+    setCart((prevCart) =>
+      prevCart
+        .map((item) =>
+          item.name === name
+            ? { ...item, quantity: item.quantity - 1 }
+            : item
+        )
+        .filter((item) => item.quantity > 0)
+    );
+  };
+
+  const clearCart = () => {
+    setCart([]);
+  };
+
   return (
     <>
-      <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400&family=Jost:wght@300;400;500;600&display=swap" rel="stylesheet" />
-<style>{`
-  *{margin:0;padding:0;box-sizing:border-box}
-  html{scroll-behavior:smooth}
-  body{
-    font-family:'Jost',sans-serif;
-    background:#faf7f2;
-    color:#1a1a18;
-    overflow-x:hidden;
-  }
+      <link
+        href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400&family=Jost:wght@300;400;500;600&display=swap"
+        rel="stylesheet"
+      />
 
-  section{
-    padding: clamp(3rem, 6vw, 6rem) clamp(1.5rem, 5vw, 4rem);
-  }
+      <style>{`
+        *{margin:0;padding:0;box-sizing:border-box}
+        html{scroll-behavior:smooth}
 
-  .container{
-  max-width:1200px;
-  margin:0 auto;
-  width:100%;
-  padding: 0 clamp(1.5rem, 5vw, 4rem);
-  }
-`}
-</style>
+        body{
+          font-family:'Jost',sans-serif;
+          background:#faf7f2;
+          color:#1a1a18;
+          overflow-x:hidden;
+        }
+
+        section{
+          padding: clamp(3rem, 6vw, 6rem)
+          clamp(1.5rem, 5vw, 4rem);
+        }
+
+        .container{
+          max-width:1200px;
+          margin:0 auto;
+          width:100%;
+          padding:0 clamp(1.5rem, 5vw, 4rem);
+        }
+      `}</style>
+
       <Nav />
       <Hero />
-      <Menu />
+
+      <Menu addToCart={addToCart} />
+
+      <Cart
+        cart={cart}
+        removeFromCart={removeFromCart}
+        clearCart={clearCart}
+      />
+
       <Gallery />
       <About />
       <Contact />
